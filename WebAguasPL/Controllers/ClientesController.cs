@@ -12,17 +12,17 @@ namespace WebAguasPL.Controllers
 {
     public class ClientesController : Controller
     {
-        private readonly DataContext _context;
+        private readonly IClienteRepository _clienteRepository;
 
-        public ClientesController(DataContext context)
+        public ClientesController(IClienteRepository clienteRepository)
         {
-            _context = context;
+            _clienteRepository = clienteRepository;
         }
 
         // GET: Clientes
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Clientes.ToListAsync());
+            return View(_clienteRepository.GetAll());
         }
 
         // GET: Clientes/Details/5
@@ -33,8 +33,7 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var cliente = await _clienteRepository.GetByIdAsync(id.Value);
             if (cliente == null)
             {
                 return NotFound();
@@ -54,12 +53,12 @@ namespace WebAguasPL.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name,NIF,Adress,Postalcode,Email,PhoneNumber")] Cliente cliente)
+        public async Task<IActionResult> Create(Cliente cliente)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(cliente);
-                await _context.SaveChangesAsync();
+                await _clienteRepository.CreateAsync(cliente);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(cliente);
@@ -73,7 +72,7 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _clienteRepository.GetByIdAsync(id.Value);
             if (cliente == null)
             {
                 return NotFound();
@@ -86,7 +85,7 @@ namespace WebAguasPL.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,NIF,Adress,Postalcode,Email,PhoneNumber")] Cliente cliente)
+        public async Task<IActionResult> Edit(int id, Cliente cliente)
         {
             if (id != cliente.ID)
             {
@@ -97,12 +96,12 @@ namespace WebAguasPL.Controllers
             {
                 try
                 {
-                    _context.Update(cliente);
-                    await _context.SaveChangesAsync();
+                    await _clienteRepository.UpdateAsync(cliente);
+                                        
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClienteExists(cliente.ID))
+                    if (!await _clienteRepository.ExistAsync(cliente.ID))
                     {
                         return NotFound();
                     }
@@ -124,8 +123,8 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var cliente = await _clienteRepository.GetByIdAsync(id.Value);
+                
             if (cliente == null)
             {
                 return NotFound();
@@ -139,15 +138,12 @@ namespace WebAguasPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
+            var cliente = await _clienteRepository.GetByIdAsync(id);
+            await _clienteRepository.DeleteAsync(cliente);
+
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ClienteExists(int id)
-        {
-            return _context.Clientes.Any(e => e.ID == id);
-        }
+        
     }
 }

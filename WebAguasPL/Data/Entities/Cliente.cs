@@ -2,7 +2,7 @@
 
 namespace WebAguasPL.Data.Entities
 {
-    public class Cliente
+    public class Cliente : IEntity
     {
         [Key]
         public int ID { get; set; }

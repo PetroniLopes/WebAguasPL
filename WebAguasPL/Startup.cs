@@ -32,6 +32,10 @@ namespace WebAguasPL
 
             services.AddTransient<SeedDb>();
 
+            services.AddScoped<IClienteRepository, ClienteRepository>();
+
+
+
 
             services.AddControllersWithViews();
 
