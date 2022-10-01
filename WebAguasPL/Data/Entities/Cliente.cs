@@ -24,6 +24,7 @@ namespace WebAguasPL.Data.Entities
         public string Postalcode { get; set; }
 
         [Required]
+        [EmailAddress]
         public string Email { get; set; }
 
 
