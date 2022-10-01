@@ -1,18 +1,24 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAguasPL.Data.Entities;
+using WebAguasPL.Helpers;
 
 namespace WebAguasPL.Data
 {
     public class SeedDb
     {
         private readonly DataContext _context;
+        private readonly IUserHelper _userHelper;
+        
         private Random _random;
 
-        public SeedDb(DataContext context)
+        public SeedDb(DataContext context, IUserHelper userHelper)
         {
             _context = context;
+            _userHelper = userHelper;
+            
             _random = new Random();
         }
 
@@ -20,13 +26,16 @@ namespace WebAguasPL.Data
         {
             await _context.Database.EnsureCreatedAsync();
 
+            await AddUser("admin", "");
+
+            
             if (!_context.Clientes.Any())
             {
-                AddCliente("Pedro","Alenquer");
-                AddCliente("Luis","Lisboa");
-                AddCliente("Brad","Porto");
-                AddCliente("Tom","USA");
-                AddCliente("Angelina","UK");
+                await AddUser("Pedro","Alenquer");
+                await AddUser("Luis","Lisboa");
+                await AddUser("Brad","Porto");
+                await AddUser("Tom","USA");
+                await AddUser("Angelina","UK");
 
                 await _context.SaveChangesAsync();
 
@@ -34,16 +43,49 @@ namespace WebAguasPL.Data
 
         }
 
-        private void AddCliente(string name, string morada)
+        private async Task AddUser(string name, string morada)
         {
-            _context.Clientes.Add(new Cliente
+            var email = (name + "@email.com");
+
+
+            /// CRIAR USER
+            var user = await _userHelper.GetUserByEmailAsync(email);
+
+            if (user == null)
             {
-                Name = name,
-                NIF = _random.Next(100000000, 999999999).ToString(),
-                Adress = morada,
-                Postalcode = (_random.Next(9999) + "-" + _random.Next(999)).ToString(),
-                Email = (_random.Next(1000000) + "@email.com")
-            });
+                user = new User
+                {
+                    Name = name,
+                    Email = email,
+                    UserName = email,
+                };
+
+                var result = await _userHelper.AddUserAsync(user, "123456");
+
+                if (result != IdentityResult.Success)
+                {
+                    throw new InvalidOperationException($"Could not create User - {name} in seeder");
+                }
+            }
+
+            if (name != "admin")
+            {
+
+                ///CRIAR CLIENTE COM USER
+
+                _context.Clientes.Add(new Cliente
+                {
+                    Name = name,
+                    NIF = _random.Next(100000000, 999999999).ToString(),
+                    Adress = morada,
+                    Postalcode = (_random.Next(9999) + "-" + _random.Next(999)).ToString(),
+                    Email = email,
+                    User = user
+                });
+            }
+
         }
+
+        
     }
 }

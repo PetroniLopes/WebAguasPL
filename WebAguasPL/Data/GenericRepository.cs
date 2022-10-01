@@ -41,6 +41,7 @@ namespace WebAguasPL.Data
 
         public IQueryable<T> GetAll()
         {
+            //return _context.Set<T>().AsNoTracking().OrderBy(e=> e.Name);
             return _context.Set<T>().AsNoTracking();
         }
 

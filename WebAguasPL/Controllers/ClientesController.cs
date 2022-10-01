@@ -2,27 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
+using WebAguasPL.Helpers;
 
 namespace WebAguasPL.Controllers
 {
     public class ClientesController : Controller
     {
         private readonly IClienteRepository _clienteRepository;
+        private readonly IUserHelper _userHelper;
 
-        public ClientesController(IClienteRepository clienteRepository)
+        public ClientesController(IClienteRepository clienteRepository, IUserHelper userHelper)
         {
             _clienteRepository = clienteRepository;
+            _userHelper = userHelper;
         }
 
         // GET: Clientes
         public IActionResult Index()
         {
-            return View(_clienteRepository.GetAll());
+            return View(_clienteRepository.GetAll().OrderBy(p=> p.Name));
         }
 
         // GET: Clientes/Details/5
@@ -57,6 +61,29 @@ namespace WebAguasPL.Controllers
         {
             if (ModelState.IsValid)
             {
+                
+                
+                /// CRIAR USER
+                cliente.User = await _userHelper.GetUserByEmailAsync(cliente.Email);
+
+                if (cliente.User == null)
+                {
+                    cliente.User = new User
+                    {
+                        Name = cliente.Name,
+                        Email = cliente.Email,
+                        UserName = cliente.Email,
+                    };
+
+                    var result = await _userHelper.AddUserAsync(cliente.User, "123456");
+
+                    if (result != IdentityResult.Success)
+                    {
+                        throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
+                    }
+                }
+
+
                 await _clienteRepository.CreateAsync(cliente);
 
                 return RedirectToAction(nameof(Index));
@@ -96,6 +123,27 @@ namespace WebAguasPL.Controllers
             {
                 try
                 {
+
+                    cliente.User = await _userHelper.GetUserByEmailAsync(cliente.Email);
+
+                    if (cliente.User == null)
+                    {
+                        cliente.User = new User
+                        {
+                            Name = cliente.Name,
+                            Email = cliente.Email,
+                            UserName = cliente.Email,
+                        };
+
+                        var result = await _userHelper.AddUserAsync(cliente.User, "123456");
+
+                        if (result != IdentityResult.Success)
+                        {
+                            throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
+                        }
+                    }
+                    
+
                     await _clienteRepository.UpdateAsync(cliente);
                                         
                 }

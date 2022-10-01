@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebAguasPL.Data.Entities;
 
 namespace WebAguasPL.Data
 {
-    public class DataContext:DbContext
+    public class DataContext : IdentityDbContext<User>
     {
 
         public DbSet<Cliente> Clientes { get; set; }
