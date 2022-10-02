@@ -14,5 +14,9 @@ namespace WebAguasPL.Helpers
         Task<SignInResult> LogInAsync(LogInViewModel model);
 
         Task LogOutAsync();
+
+        Task<IdentityResult> UpdateUserAsync(User user);
+
+        Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword);
     }
 }
