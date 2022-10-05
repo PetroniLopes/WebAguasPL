@@ -13,7 +13,7 @@ using WebAguasPL.Helpers;
 
 namespace WebAguasPL.Controllers
 {
-    [Authorize]
+    
     public class ClientesController : Controller
     {
         private readonly IClienteRepository _clienteRepository;
@@ -29,6 +29,7 @@ namespace WebAguasPL.Controllers
         public IActionResult Index()
         {
             return View(_clienteRepository.GetAll().OrderBy(p=> p.Name));
+            
         }
 
         // GET: Clientes/Details/5
@@ -75,6 +76,9 @@ namespace WebAguasPL.Controllers
                         Name = cliente.Name,
                         Email = cliente.Email,
                         UserName = cliente.Email,
+                        NIF = cliente.NIF,
+                        Adress = cliente.Adress,
+                        Postalcode = cliente.Postalcode
                     };
 
                     var result = await _userHelper.AddUserAsync(cliente.User, "123456");
@@ -126,25 +130,36 @@ namespace WebAguasPL.Controllers
                 try
                 {
 
-                    cliente.User = await _userHelper.GetUserByEmailAsync(cliente.Email);
+                    var clienteAntigo = await _clienteRepository.GetByIdAsync(id);
+                    var user = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
 
-                    if (cliente.User == null)
-                    {
-                        cliente.User = new User
-                        {
-                            Name = cliente.Name,
-                            Email = cliente.Email,
-                            UserName = cliente.Email,
-                        };
+                    //cliente.User = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
 
-                        var result = await _userHelper.AddUserAsync(cliente.User, "123456");
+                    //if (cliente.Email != user.UserName)
+                    //{
+                        user.UserName = cliente.Email;
+                        user.Email = cliente.Email;
+                        user.NIF = cliente.NIF;
+                        user.Adress = cliente.Adress;
+                        user.Postalcode = cliente.Postalcode;
 
-                        if (result != IdentityResult.Success)
-                        {
-                            throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
-                        }
-                    }
+                        //cliente.User = new User
+                        //{
+                        //    Name = cliente.Name,
+                        //    Email = cliente.Email,
+                        //    UserName = cliente.Email,
+                        //};
+
+                        //var result = await _userHelper.AddUserAsync(cliente.User, "123456");
+
+                        //if (result != IdentityResult.Success)
+                        //{
+                        //    throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
+                        //}
+                    //}
                     
+
+                    await _userHelper.UpdateUserAsync(user);
 
                     await _clienteRepository.UpdateAsync(cliente);
                                         
@@ -194,6 +209,15 @@ namespace WebAguasPL.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        
+        public async Task<IActionResult> ShowProfile()
+        {
+            var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+
+            var cliente = await _clienteRepository.GetByUserAsync(user);
+
+
+
+            return View(cliente);
+        }
     }
 }

@@ -2,25 +2,122 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
 using WebAguasPL.Models;
 
 namespace WebAguasPL.Controllers
 {
+    
     public class AccountController : Controller
     {
+        private readonly IClienteRepository _clienteRepository;
         private readonly IUserHelper _userHelper;
+        private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
 
-        public AccountController(IUserHelper userHelper)
+        public AccountController(IClienteRepository clienteRepository, IUserHelper userHelper, RoleManager<IdentityRole> roleManager)
         {
+            _clienteRepository = clienteRepository;
             _userHelper = userHelper;
+            _roleManager = roleManager;
         }
 
-        public IActionResult Login()
+        // GET: Users
+        public async Task<IActionResult> Index()
+        {
+            return View(await _userHelper.GetAllUsers());
+
+        }
+
+        // GET: Users/Edit/5
+        public IActionResult Edit(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user =  _userHelper.GetUserByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new UsersViewModel
+            {
+                roles = _userHelper.GetComboRoles(),
+                
+
+            };
+
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UsersViewModel model)
+        {
+            //if (ModelState.IsValid)
+            //{
+                var user = await _userHelper.GetUserByIdAsync(model.Id);
+                if (user == null)
+                {
+                    return View(model);
+                }
+
+
+                var roleName = await _userHelper.GetRoleNameById(model.RoleId);
+                if (roleName == null)
+                {
+                    return View(model);
+                }
+                //var newRole = await _roleManager.GetRoleNameAsync(new IdentityRole{Id = model.RoleId });
+
+
+                
+                if (_userHelper.GetUSerRoles(user).Result.Any())
+                {
+
+                var roleApagar = _userHelper.GetUSerRoles(user).Result.First();
+                    
+                await _userHelper.RemoveUserToRoleAsync(user, roleApagar);
+
+                }
+                if (await _clienteRepository.GetByUserAsync(user) == null)
+                {
+                    Cliente cliente = new Cliente
+                    {
+                        Name = user.Name,
+                        Email = user.Email,
+                        NIF= user.NIF,
+                        Adress = user.Adress,
+                        Postalcode = user.Postalcode,
+                        User = user                   
+                    };
+
+                    await _clienteRepository.CreateAsync(cliente);
+
+                }
+                await _userHelper.AddUserToRoleAsync(user, roleName);
+
+                return RedirectToAction("Index");
+            //}
+
+            //return View(model);
+
+    }
+
+
+    public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -57,7 +154,7 @@ namespace WebAguasPL.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        [Authorize]
+        //[Authorize(Roles = "admin")]
         public IActionResult Register()
         {
             return View();
@@ -76,6 +173,9 @@ namespace WebAguasPL.Controllers
                         Name = model.Name,
                         Email = model.UserName,
                         UserName = model.UserName,
+                        NIF = model.NIF,
+                        Adress = model.Adress,
+                        Postalcode = model.Postalcode
                     };
 
                     var result = await _userHelper.AddUserAsync(user, model.Password);

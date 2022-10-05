@@ -22,10 +22,21 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="Index">Clientes</a>
+                            
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("client")){
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="ShowProfile">Clientes</a>
+                            }
+                            else{
+                                @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("admin")){
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="Index">Clientes</a>
+
+                                }
+                            }
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Registar User</a>
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("admin")) { 
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Users</a>
+                            }
                         </li>
                     </ul>
                     <ul>

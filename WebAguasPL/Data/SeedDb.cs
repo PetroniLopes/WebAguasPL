@@ -26,16 +26,25 @@ namespace WebAguasPL.Data
         {
             await _context.Database.EnsureCreatedAsync();
 
-            await AddUser("admin", "");
+            await _userHelper.CheckRoleAsync("admin");
+            await _userHelper.CheckRoleAsync("client");
+            await _userHelper.CheckRoleAsync("employee");
 
-            
+
+
+
+            await AddUser("admin", "testeadmin", "admin");
+            await AddUser("Andre", "testeandre", "employee");
+
             if (!_context.Clientes.Any())
             {
-                await AddUser("Pedro","Alenquer");
-                await AddUser("Luis","Lisboa");
-                await AddUser("Brad","Porto");
-                await AddUser("Tom","USA");
-                await AddUser("Angelina","UK");
+                await AddUser("Pedro","Alenquer", "client");
+                await AddUser("Luis","Lisboa", "client");
+                await AddUser("Brad","Porto", "client");
+                await AddUser("Tom","USA", "client");
+                await AddUser("Angelina","UK", "client");
+                
+
 
                 await _context.SaveChangesAsync();
 
@@ -43,7 +52,7 @@ namespace WebAguasPL.Data
 
         }
 
-        private async Task AddUser(string name, string morada)
+        private async Task AddUser(string name, string morada, string roleName)
         {
             var email = (name + "@email.com");
 
@@ -56,6 +65,9 @@ namespace WebAguasPL.Data
                 user = new User
                 {
                     Name = name,
+                    NIF = _random.Next(100000000, 999999999).ToString(),
+                    Adress = morada,
+                    Postalcode = (_random.Next(9999) + "-" + _random.Next(999)).ToString(),
                     Email = email,
                     UserName = email,
                 };
@@ -66,9 +78,21 @@ namespace WebAguasPL.Data
                 {
                     throw new InvalidOperationException($"Could not create User - {name} in seeder");
                 }
+
+                //if (name == "admin")
+                //{
+                await _userHelper.AddUserToRoleAsync(user, roleName);
+                //}
+
+                var isInRole = await _userHelper.IsUserInRoleAsync(user, roleName);
+                if (!isInRole)
+                {
+                    await _userHelper.AddUserToRoleAsync(user, roleName);
+                }
+
             }
 
-            if (name != "admin")
+            if (name != "admin" && name != "employee")
             {
 
                 ///CRIAR CLIENTE COM USER
