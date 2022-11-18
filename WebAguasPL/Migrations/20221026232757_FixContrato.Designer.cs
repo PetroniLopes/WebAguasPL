@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAguasPL.Data;
 
 namespace WebAguasPL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221026232757_FixContrato")]
+    partial class FixContrato
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,9 +211,6 @@ namespace WebAguasPL.Migrations
                     b.Property<DateTime>("ContractDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Postalcode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -366,11 +365,14 @@ namespace WebAguasPL.Migrations
 
             modelBuilder.Entity("WebAguasPL.Data.Entities.Contrato", b =>
                 {
-                    b.HasOne("WebAguasPL.Data.Entities.Cliente", "Cliente")
-                        .WithMany()
+                    b.HasOne("WebAguasPL.Data.Entities.Cliente", null)
+                        .WithMany("Contratos")
                         .HasForeignKey("ClienteID");
+                });
 
-                    b.Navigation("Cliente");
+            modelBuilder.Entity("WebAguasPL.Data.Entities.Cliente", b =>
+                {
+                    b.Navigation("Contratos");
                 });
 #pragma warning restore 612, 618
         }
