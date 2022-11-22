@@ -25,6 +25,76 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning">Edit</a> |
+    <a asp-action="AddLeitura" asp-route-id="@Model.ID" class="btn btn-info">Adicionar Leitura</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+<h4>Leituras</h4>
+@if(Model.Leituras == null || Model.Leituras.Count == 0){
+    <h5>Ainda não tem leituras inseridas</h5>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Leituras.FirstOrDefault().DataLeitura)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Leituras.FirstOrDefault().Valor)
+                </th>
+                
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Leituras)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.DataLeitura)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Valor)
+                    </td>
+                    
+                    <td id="@item.ID">
+
+                        <a asp-action="EditLeitura" asp-route-id="@item.ID" class="btn btn-warning">Edit</a>
+                        <a asp-action="DeleteLeitura" asp-route-id="@item.ID" class="btn btn-danger" id="btnDelete">Delete</a>
+                        
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @*<script type="text/javascript">
+        $(document).ready(function(){
+            var id = 0;
+            $('a[id*=btnDelete]').click(function(){
+                debugger;
+                id = $(this).parent()[0].id;
+                $("#deleteDialog").modal('show');
+                return false;
+            });
+            $("#btnNoDelete").click(function(){
+                $("#deleteDialog").modal('hide');
+                return false;
+            });
+            $("#btnYesDelete").click(function () {
+                window.location.href = '/Contratos/DeleteLeitura/' + id;
+            });
+        });
+
+    </script>*@
+
+
+
+}

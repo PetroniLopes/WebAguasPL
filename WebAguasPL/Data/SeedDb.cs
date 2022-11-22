@@ -47,10 +47,28 @@ namespace WebAguasPL.Data
                 
 
 
-                await _context.SaveChangesAsync();
 
             }
 
+            if (!_context.Escaloes.Any())
+            {
+                AddEscalao(5, 0.3);
+                AddEscalao(15, 0.8);
+                AddEscalao(25, 1.2);
+                AddEscalao(0, 1.6);
+            }
+            
+            await _context.SaveChangesAsync();
+
+        }
+
+        private void AddEscalao(int limite, double valorUnitario)
+        {
+            _context.Escaloes.Add(new Escalao
+            {
+                Limite = limite,
+                ValorUnitario = valorUnitario
+            });
         }
 
         private async Task AddUser(string name, string morada, string roleName)

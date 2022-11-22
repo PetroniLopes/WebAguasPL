@@ -89,7 +89,9 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var contrato = await _contrato.GetContractByIdAsync(id.Value);
+            //var contrato = await _contrato.GetContractByIdAsync(id.Value);
+
+            var contrato = await _contrato.GetContractWithLeiturasAsync(id.Value);
 
             if (contrato == null)
             {
@@ -238,6 +240,102 @@ namespace WebAguasPL.Controllers
             
             return RedirectToAction(nameof(Index));
         }
+
+
+
+
+        /////////////////////////////////////////
+        //////LEITURAS
+        ///
+
+        public async Task<IActionResult> DeleteLeitura(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var leitura = await _contrato.GetLeituraAsync(id.Value);
+
+            if (leitura == null)
+            {
+                return NotFound();
+            }
+
+            var contratoId = await _contrato.DeleteLeituraAsync(leitura);
+
+            return RedirectToAction("Details", new { id = contratoId });
+        }
+
+
+        public async Task<IActionResult> EditLeitura(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var leitura = await _contrato.GetLeituraAsync(id.Value);
+
+            if (leitura == null)
+            {
+                return NotFound();
+            }
+
+            return View(leitura);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditLeitura(Leitura leitura)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var contratoId = await _contrato.UpdateLeituraAsync(leitura);
+                if(contratoId != 0)
+                {
+                    //return this.RedirectToAction($"Details/{contratoId}");
+                    return RedirectToAction("Details", new { id = contratoId });
+                }
+            }
+
+            return this.View(leitura);
+        }
+
+        public async Task<IActionResult> AddLeitura(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var contrato = await _contrato.GetByIdAsync(id.Value);
+
+            if (contrato == null)
+            {
+                return NotFound();
+            }
+
+            var model = new LeituraViewModel
+            {
+                ContratoID = contrato.ID
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddLeitura(LeituraViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                await _contrato.AddLeituraAsync(model);
+
+                return RedirectToAction("Details", new {id = model.ContratoID});
+            }
+            return this.View(model);
+        }
+
+        
 
     }
 }

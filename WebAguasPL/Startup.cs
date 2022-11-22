@@ -55,6 +55,7 @@ namespace WebAguasPL
 
             services.AddScoped<IContratoRepository, ContratoRepository>();
 
+            services.AddScoped<ILeituraRepository, LeituraRepository>();
 
 
 

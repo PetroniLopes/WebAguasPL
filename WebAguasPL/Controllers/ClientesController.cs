@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
+using WebAguasPL.Models;
 
 namespace WebAguasPL.Controllers
 {
@@ -60,41 +62,75 @@ namespace WebAguasPL.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Cliente cliente)
+        public async Task<IActionResult> Create(ClienteViewModel model)
         {
             if (ModelState.IsValid)
             {
                 
-                
                 /// CRIAR USER
-                cliente.User = await _userHelper.GetUserByEmailAsync(cliente.Email);
+                model.User = await _userHelper.GetUserByEmailAsync(model.Email);
 
-                if (cliente.User == null)
+                if (model.User == null)
                 {
-                    cliente.User = new User
+                    model.User = new User
                     {
-                        Name = cliente.Name,
-                        Email = cliente.Email,
-                        UserName = cliente.Email,
-                        NIF = cliente.NIF,
-                        Adress = cliente.Adress,
-                        Postalcode = cliente.Postalcode
+                        Name = model.Name,
+                        Email = model.Email,
+                        UserName = model.Email,
+                        NIF = model.NIF,
+                        Adress = model.Adress,
+                        Postalcode = model.Postalcode
                     };
 
-                    var result = await _userHelper.AddUserAsync(cliente.User, "123456");
+                    var result = await _userHelper.AddUserAsync(model.User, "123456");
 
                     if (result != IdentityResult.Success)
                     {
-                        throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
+                        throw new InvalidOperationException($"Could not create User - {model.Name} in seeder");
                     }
                 }
 
+
+                var path = string.Empty;
+
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
+                {
+                    path = Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "wwwroot\\images\\clientes",
+                            model.ImageFile.FileName);
+
+                    using (var stream = new FileStream(path, FileMode.Create))
+                    {
+                        await model.ImageFile.CopyToAsync(stream);
+                    }
+
+                    path = $"~/images/products/{model.ImageFile.FileName}";
+                }
+
+                var cliente = this.ToCliente(model, path);
 
                 await _clienteRepository.CreateAsync(cliente);
 
                 return RedirectToAction(nameof(Index));
             }
-            return View(cliente);
+            return View(model);
+        }
+
+        private Cliente ToCliente(ClienteViewModel model, string path)
+        {
+            return new Cliente
+            {
+                ID = model.ID,
+                Name = model.Name,
+                NIF = model.NIF,
+                Adress = model.Adress,
+                Postalcode = model.Postalcode,
+                Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
+                ImageUrl = path,
+                User = model.User
+            };
         }
 
         // GET: Clientes/Edit/5

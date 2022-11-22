@@ -1,0 +1,32 @@
+﻿@model WebAguasPL.Models.LeituraViewModel
+
+<h4>Leitura</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddLeitura">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ContratoID" />
+
+            <div class="form-group">
+                <label asp-for="Valor" class="control-label"></label>
+                <input asp-for="Valor" class="form-control" />
+                <span asp-validation-for="Valor" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="DataLeitura" class="control-label"></label>
+                <input asp-for="DataLeitura" class="form-control" />
+                <span asp-validation-for="DataLeitura" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

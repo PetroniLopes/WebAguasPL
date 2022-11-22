@@ -20,5 +20,23 @@ namespace WebAguasPL.Data
         Task<bool> ContractExists(int id);
 
         Task DeleteContractAsync(Contrato contrato);
+
+
+        //LEITURAS
+
+        IQueryable GetContratosWithLeituras();
+
+        Task<Contrato> GetContractWithLeiturasAsync(int id);
+
+        Task<Leitura> GetLeituraAsync(int id);
+
+        Task AddLeituraAsync(LeituraViewModel model);
+
+        Task<int> UpdateLeituraAsync(Leitura leitura);
+
+        Task<int> DeleteLeituraAsync(Leitura leitura);
+
+        Task<Contrato> GetContratoByLeitura(Leitura leitura);
+
     }
 }

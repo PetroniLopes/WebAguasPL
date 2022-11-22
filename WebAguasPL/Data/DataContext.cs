@@ -11,6 +11,10 @@ namespace WebAguasPL.Data
 
         public DbSet<Contrato> Contratos { get; set; }
 
+        public DbSet<Escalao> Escaloes { get; set; }
+
+        public DbSet<Leitura> Leituras { get; set; }
+
 
         public DataContext(DbContextOptions<DataContext>options) : base(options)
         {

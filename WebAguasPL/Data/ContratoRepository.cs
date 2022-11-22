@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAguasPL.Data.Entities;
@@ -118,6 +119,149 @@ namespace WebAguasPL.Data
                 _context.Contratos.Remove(contrato);
                 await _context.SaveChangesAsync();
             }
+        }
+
+
+
+
+        ///////////////LEITURAS
+        ///////////////////////////////////////////////////
+
+        public async Task<Contrato> GetContractWithLeiturasAsync(int id)
+        {
+            return await _context.Contratos
+                    .Include(c => c.Leituras)
+                    .Where(c => c.ID == id)
+                    .FirstOrDefaultAsync();
+        }
+
+        public IQueryable GetContratosWithLeituras()
+        {
+            return _context.Contratos
+                    .Include(c => c.Leituras)
+                    .OrderBy(c => c.ContractDate);
+        }
+
+        public async Task AddLeituraAsync(LeituraViewModel model)
+        {
+            var contrato = await this.GetContractWithLeiturasAsync(model.ContratoID);
+            if(contrato == null)
+            {
+                return;
+            }
+
+            contrato.Leituras.Add(new Leitura
+            {
+                DataLeitura = model.DataLeitura,
+                Valor = ValorConsumo(model.Valor),
+                Estado = model.Estado
+            });
+
+            _context.Contratos.Update(contrato);
+            await _context.SaveChangesAsync();
+        }
+
+
+        public async Task<int> DeleteLeituraAsync(Leitura leitura)
+        {
+            var contrato = await _context.Contratos
+                            .Where(c => c.Leituras.Any(cl => cl.ID == leitura.ID))
+                            .FirstOrDefaultAsync();
+
+            if (contrato == null)
+            {
+                return 0;
+            }
+
+            _context.Leituras.Remove(leitura);
+            await _context.SaveChangesAsync();
+
+            return contrato.ID;
+        }
+
+        public async Task<int> UpdateLeituraAsync(Leitura leitura)
+        {
+            var contrato = await _context.Contratos
+                            .Where(c => c.Leituras.Any(cl => cl.ID == leitura.ID))
+                            .FirstOrDefaultAsync();
+
+            if (contrato == null)
+            {
+                return 0;
+            }
+
+            _context.Leituras.Update(leitura);
+            await _context.SaveChangesAsync();
+
+            return contrato.ID;
+        }
+
+        public async Task<Leitura> GetLeituraAsync(int id)
+        {
+            return await _context.Leituras.FindAsync(id);
+        }
+
+        public async Task<Contrato> GetContratoByLeitura(Leitura leitura)
+        {
+            return await _context.Contratos
+                    .Where(c => c.Leituras.Any(l => l.ID == leitura.ID))
+                    .FirstOrDefaultAsync();
+        }
+
+
+
+
+        public double ValorConsumo(double valor)
+        {
+
+            var TabelaDeEscaloes = new List<Escalao>();
+            TabelaDeEscaloes.Add(new Escalao { Limite = 0, ValorUnitario = 1.6 });
+            TabelaDeEscaloes.Add(new Escalao { Limite = 5, ValorUnitario = 0.3 });
+            TabelaDeEscaloes.Add(new Escalao { Limite = 15, ValorUnitario = 0.8 });
+            TabelaDeEscaloes.Add(new Escalao { Limite = 25, ValorUnitario = 1.3 });
+
+            double total = 0;
+            double consumo = valor;
+            double valorteto = 0;
+            double limiteAtratar = 0;
+
+            foreach (var escalao in TabelaDeEscaloes)
+            {
+
+                if (escalao.Limite == 0)
+                {
+                    valorteto = escalao.ValorUnitario;
+                }
+                else
+                {
+
+                    if (consumo - escalao.Limite >= 0)
+                    {
+
+                        total += escalao.ValorUnitario * (escalao.Limite - limiteAtratar);
+                        limiteAtratar = escalao.Limite;
+                    }
+                    else
+                    {
+                        total += escalao.ValorUnitario * (escalao.Limite - consumo);
+                        return total;
+                    }
+                    if (consumo - escalao.Limite == 0)
+                    {
+
+                        return total;
+                    }
+
+                }
+
+
+            }
+
+
+            total += (consumo - limiteAtratar) * valorteto;
+
+
+            return total;
         }
     }
 }

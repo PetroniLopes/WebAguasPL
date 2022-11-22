@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebAguasPL.Data;
 
 namespace WebAguasPL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20221118065847_addEscalao")]
+    partial class addEscalao
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,9 +167,6 @@ namespace WebAguasPL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("NIF")
                         .IsRequired()
                         .HasMaxLength(9)
@@ -242,32 +241,6 @@ namespace WebAguasPL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Escaloes");
-                });
-
-            modelBuilder.Entity("WebAguasPL.Data.Entities.Leitura", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int?>("ContratoID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DataLeitura")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Estado")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("Valor")
-                        .HasColumnType("float");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ContratoID");
-
-                    b.ToTable("Leituras");
                 });
 
             modelBuilder.Entity("WebAguasPL.Data.Entities.User", b =>
@@ -418,18 +391,6 @@ namespace WebAguasPL.Migrations
                         .HasForeignKey("ClienteID");
 
                     b.Navigation("Cliente");
-                });
-
-            modelBuilder.Entity("WebAguasPL.Data.Entities.Leitura", b =>
-                {
-                    b.HasOne("WebAguasPL.Data.Entities.Contrato", null)
-                        .WithMany("Leituras")
-                        .HasForeignKey("ContratoID");
-                });
-
-            modelBuilder.Entity("WebAguasPL.Data.Entities.Contrato", b =>
-                {
-                    b.Navigation("Leituras");
                 });
 #pragma warning restore 612, 618
         }
