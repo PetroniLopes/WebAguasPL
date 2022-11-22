@@ -57,6 +57,8 @@ namespace WebAguasPL
 
             services.AddScoped<ILeituraRepository, LeituraRepository>();
 
+            services.AddScoped<IConverterHelper, ConverterHelper>();
+
 
 
             services.AddControllersWithViews();

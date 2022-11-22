@@ -20,11 +20,13 @@ namespace WebAguasPL.Controllers
     {
         private readonly IClienteRepository _clienteRepository;
         private readonly IUserHelper _userHelper;
+        private readonly IConverterHelper _converterHelper;
 
-        public ClientesController(IClienteRepository clienteRepository, IUserHelper userHelper)
+        public ClientesController(IClienteRepository clienteRepository, IUserHelper userHelper, IConverterHelper converterHelper)
         {
             _clienteRepository = clienteRepository;
             _userHelper = userHelper;
+            _converterHelper = converterHelper;
         }
 
         // GET: Clientes
@@ -95,20 +97,28 @@ namespace WebAguasPL.Controllers
 
                 if (model.ImageFile != null && model.ImageFile.Length > 0)
                 {
+                    var guid = Guid.NewGuid().ToString();
+                    var file = $"{guid}.jpg";
+
+
                     path = Path.Combine(
                             Directory.GetCurrentDirectory(),
                             "wwwroot\\images\\clientes",
-                            model.ImageFile.FileName);
+                            file);
 
                     using (var stream = new FileStream(path, FileMode.Create))
                     {
                         await model.ImageFile.CopyToAsync(stream);
                     }
 
-                    path = $"~/images/products/{model.ImageFile.FileName}";
+                    path = $"~/images/clientes/{file}";
+                }
+                else
+                {
+                    path = $"~/images/clientes/noimage.png";
                 }
 
-                var cliente = this.ToCliente(model, path);
+                var cliente = _converterHelper.ToCliente(model, path);
 
                 await _clienteRepository.CreateAsync(cliente);
 
@@ -117,21 +127,7 @@ namespace WebAguasPL.Controllers
             return View(model);
         }
 
-        private Cliente ToCliente(ClienteViewModel model, string path)
-        {
-            return new Cliente
-            {
-                ID = model.ID,
-                Name = model.Name,
-                NIF = model.NIF,
-                Adress = model.Adress,
-                Postalcode = model.Postalcode,
-                Email = model.Email,
-                PhoneNumber = model.PhoneNumber,
-                ImageUrl = path,
-                User = model.User
-            };
-        }
+        
 
         // GET: Clientes/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -146,17 +142,23 @@ namespace WebAguasPL.Controllers
             {
                 return NotFound();
             }
-            return View(cliente);
+
+            var model = _converterHelper.ToClienteViewModel(cliente);
+
+
+            return View(model);
         }
+
+        
 
         // POST: Clientes/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Cliente cliente)
+        public async Task<IActionResult> Edit(int id, ClienteViewModel model)
         {
-            if (id != cliente.ID)
+            if (id != model.ID)
             {
                 return NotFound();
             }
@@ -169,31 +171,35 @@ namespace WebAguasPL.Controllers
                     var clienteAntigo = await _clienteRepository.GetByIdAsync(id);
                     var user = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
 
-                    //cliente.User = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
-
-                    //if (cliente.Email != user.UserName)
-                    //{
-                        user.UserName = cliente.Email;
-                        user.Email = cliente.Email;
-                        user.NIF = cliente.NIF;
-                        user.Adress = cliente.Adress;
-                        user.Postalcode = cliente.Postalcode;
-
-                        //cliente.User = new User
-                        //{
-                        //    Name = cliente.Name,
-                        //    Email = cliente.Email,
-                        //    UserName = cliente.Email,
-                        //};
-
-                        //var result = await _userHelper.AddUserAsync(cliente.User, "123456");
-
-                        //if (result != IdentityResult.Success)
-                        //{
-                        //    throw new InvalidOperationException($"Could not create User - {cliente.Name} in seeder");
-                        //}
-                    //}
                     
+                    user.UserName = model.Email;
+                    user.Email = model.Email;
+                    user.NIF = model.NIF;
+                    user.Adress = model.Adress;
+                    user.Postalcode = model.Postalcode;
+
+
+                    var path = model.ImageUrl;
+
+                    if (model.ImageFile != null && model.ImageFile.Length > 0)
+                    {
+                        var guid = Guid.NewGuid().ToString();
+                        var file = $"{guid}.jpg";
+
+                        path = Path.Combine(
+                                Directory.GetCurrentDirectory(),
+                                "wwwroot\\images\\clientes",
+                                file);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await model.ImageFile.CopyToAsync(stream);
+                        }
+
+                        path = $"~/images/clientes/{file}";
+                    }
+
+                    var cliente = _converterHelper.ToCliente(model, path);
 
                     await _userHelper.UpdateUserAsync(user);
 
@@ -202,7 +208,7 @@ namespace WebAguasPL.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!await _clienteRepository.ExistAsync(cliente.ID))
+                    if (!await _clienteRepository.ExistAsync(model.ID))
                     {
                         return NotFound();
                     }
@@ -213,7 +219,7 @@ namespace WebAguasPL.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(cliente);
+            return View(model);
         }
 
         // GET: Clientes/Delete/5

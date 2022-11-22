@@ -39,7 +39,20 @@ namespace WebAguasPL.Data.Entities
         
         public User User { get; set; }
 
-        //public IEnumerable<Contrato> Contratos { get; set; }
+
+        public string ImageFullPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(ImageUrl))
+                {
+                    return null;
+                }
+
+                return $"https://https://localhost:44303{ImageUrl.Substring(1)}";
+            }
+        }
+        
 
     }
 }

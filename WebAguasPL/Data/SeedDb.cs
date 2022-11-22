@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WebAguasPL.Data.Entities;
@@ -27,18 +28,21 @@ namespace WebAguasPL.Data
         {
             await _context.Database.MigrateAsync();
 
-            await _userHelper.CheckRoleAsync("admin");
-            await _userHelper.CheckRoleAsync("client");
-            await _userHelper.CheckRoleAsync("employee");
-
-
-
-
-            await AddUser("admin", "testeadmin", "admin");
-            await AddUser("Andre", "testeandre", "employee");
 
             if (!_context.Clientes.Any())
             {
+                await _userHelper.CheckRoleAsync("admin");
+                await _userHelper.CheckRoleAsync("client");
+                await _userHelper.CheckRoleAsync("employee");
+
+
+
+
+                await AddUser("admin", "testeadmin", "admin");
+                await AddUser("Andre", "testeandre", "employee");
+
+
+
                 await AddUser("Pedro","Alenquer", "client");
                 await AddUser("Luis","Lisboa", "client");
                 await AddUser("Brad","Porto", "client");
@@ -123,8 +127,9 @@ namespace WebAguasPL.Data
                     Adress = morada,
                     Postalcode = (_random.Next(9999) + "-" + _random.Next(999)).ToString(),
                     Email = email,
-                    User = user
-                });
+                    User = user,
+                    ImageUrl = $"~/images/clientes/noimage.png"
+            });
             }
 
         }
