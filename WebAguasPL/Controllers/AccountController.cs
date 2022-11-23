@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -25,6 +27,8 @@ namespace WebAguasPL.Controllers
         private readonly IConfiguration _configuration;
         private readonly IMailHelper _mailHelper;
 
+        private Random _random;
+
         public AccountController(IClienteRepository clienteRepository,
             IUserHelper userHelper,
             RoleManager<IdentityRole> roleManager,
@@ -36,6 +40,7 @@ namespace WebAguasPL.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
             _mailHelper = mailHelper;
+            _random = new Random();
         }
 
         // GET: Users
@@ -229,6 +234,61 @@ namespace WebAguasPL.Controllers
             return View(model);
         }
 
+        public IActionResult ResetPassword()
+        {
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.email);
+
+                if (user == null)
+                {
+                    this.ModelState.AddModelError(string.Empty, "User not found");
+                    return View(model);
+                }
+
+
+                string newPassword = _random.Next(999999999).ToString();
+
+                
+                string myToken = await _userHelper.GeneratePasswordResetTokenAsync(user);
+
+                string tokenLink = Url.Action("ConfirmPassword", "Account", new
+                {
+                    userid = user.Id,
+                    token = myToken,
+                    password = newPassword
+                }, protocol: HttpContext.Request.Scheme);
+
+                Response response = _mailHelper.SendEmail(
+                    model.email,
+                    "Reset Password",
+
+                    $"<h1>Reset password request</h1>" +
+                    $"There was a request to change the password of this User.</br></br>" +
+                    $"Your new password is: {newPassword}</br></br>" +
+                    $"Click in this link to continue:<a href = \"{tokenLink}\"> Change Password</a>"
+                    );
+
+                if (response.IsSuccess)
+                {
+                    ViewBag.Message = "The instructions to allow your access has been sent to email";
+                    return View();
+
+                }
+
+                ModelState.AddModelError(string.Empty, "Something went wrong, please contact us at appaguaslisboa@gmail.com");
+
+            }
+            return View(model);
+        }
+
         public async Task<IActionResult> ChangeUser()
         {
             var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
@@ -306,7 +366,7 @@ namespace WebAguasPL.Controllers
         }
 
 
-
+        //API
         [HttpPost]
         public async Task<IActionResult> CreateToken([FromBody] LogInViewModel model)
         {
@@ -371,5 +431,27 @@ namespace WebAguasPL.Controllers
             return View();
         }
 
+        public async Task<IActionResult> ConfirmPassword(string userId, string token, string password)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(password))
+            {
+                return NotFound();
+            }
+
+            var user = await _userHelper.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.ResetPasswordAsync(user, token, password);
+
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return View();
+        }
     }
 }

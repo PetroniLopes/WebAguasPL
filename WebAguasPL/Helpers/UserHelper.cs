@@ -49,6 +49,7 @@ namespace WebAguasPL.Helpers
         public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
         {
             return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            
         }
 
         public async Task CheckRoleAsync(string roleName)
@@ -195,6 +196,16 @@ namespace WebAguasPL.Helpers
         public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);
+        }
+
+        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(user);
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(User user, string token, string newPassword)
+        {
+            return await _userManager.ResetPasswordAsync(user, token, newPassword);
         }
     }
 }
