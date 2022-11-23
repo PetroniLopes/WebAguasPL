@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 using WebAguasPL.Data.Entities;
 
@@ -20,6 +21,15 @@ namespace WebAguasPL.Data
                 .FirstOrDefaultAsync(e => e.User == user);
         }
 
+        public async Task<bool> ClientHasContract(Cliente cliente)
+        {
+            
+            if(await _context.Contratos.Where(c => c.Cliente == cliente).FirstOrDefaultAsync() == null)
+            {
+                return false;
+            }
+            return true;
+        }
             
     }
 }

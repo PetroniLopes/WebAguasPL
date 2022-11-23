@@ -61,7 +61,7 @@ else
                     </td>
                     
                     <td id="@item.ID">
-
+                        <div asp-validation-summary="ModelOnly"></div>
                         <a asp-action="EditLeitura" asp-route-id="@item.ID" class="btn btn-warning">Edit</a>
                         <a asp-action="DeleteLeitura" asp-route-id="@item.ID" class="btn btn-danger" id="btnDelete">Delete</a>
                         

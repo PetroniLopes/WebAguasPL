@@ -121,11 +121,19 @@ namespace WebAguasPL.Data
             }
         }
 
+        public async Task<bool> ContractHasReadings(Contrato contrato)
+        {
+            var mycontrato = await this.GetContractWithLeiturasAsync(contrato.ID);
+            if (mycontrato.Leituras.Count == 0 || mycontrato.Leituras == null)
+            {
+                return false;
+            }
+            return true;
+        }
 
 
-
-        ///////////////LEITURAS
-        ///////////////////////////////////////////////////
+            ///////////////LEITURAS
+            ///////////////////////////////////////////////////
 
         public async Task<Contrato> GetContractWithLeiturasAsync(int id)
         {

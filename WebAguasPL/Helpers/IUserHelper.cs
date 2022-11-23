@@ -39,6 +39,10 @@ namespace WebAguasPL.Helpers
         Task RemoveUserToRoleAsync(User user, string roleName);
 
         Task<IEnumerable<string>> GetUSerRoles(User user);
+
+
+
+        Task<SignInResult> ValidatePasswordAsync(User user, string password);
     }
 
 }

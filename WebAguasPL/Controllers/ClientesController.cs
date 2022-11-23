@@ -246,9 +246,16 @@ namespace WebAguasPL.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cliente = await _clienteRepository.GetByIdAsync(id);
-            await _clienteRepository.DeleteAsync(cliente);
+            if(!await _clienteRepository.ClientHasContract(cliente))
+            {
 
-            return RedirectToAction(nameof(Index));
+                await _clienteRepository.DeleteAsync(cliente);
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            this.ModelState.AddModelError(string.Empty, "O cliente não pode ser apagado porque já tem contratos associados!");
+            return View(cliente);
         }
 
         public async Task<IActionResult> ShowProfile()

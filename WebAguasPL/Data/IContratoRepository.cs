@@ -21,6 +21,7 @@ namespace WebAguasPL.Data
 
         Task DeleteContractAsync(Contrato contrato);
 
+        Task<bool> ContractHasReadings(Contrato contrato);
 
         //LEITURAS
 

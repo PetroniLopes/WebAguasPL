@@ -1,31 +1,38 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.Routing;
-using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
 using WebAguasPL.Models;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace WebAguasPL.Controllers
 {
-    
+
     public class AccountController : Controller
     {
         private readonly IClienteRepository _clienteRepository;
         private readonly IUserHelper _userHelper;
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(IClienteRepository clienteRepository, IUserHelper userHelper, RoleManager<IdentityRole> roleManager)
+        public AccountController(IClienteRepository clienteRepository,
+            IUserHelper userHelper,
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration)
         {
             _clienteRepository = clienteRepository;
             _userHelper = userHelper;
             _roleManager = roleManager;
+            _configuration = configuration;
         }
 
         // GET: Users
@@ -43,7 +50,7 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var user =  _userHelper.GetUserByIdAsync(id);
+            var user = _userHelper.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -53,7 +60,7 @@ namespace WebAguasPL.Controllers
             var model = new UsersViewModel
             {
                 roles = _userHelper.GetComboRoles(),
-                
+
 
             };
 
@@ -68,56 +75,56 @@ namespace WebAguasPL.Controllers
         {
             //if (ModelState.IsValid)
             //{
-                var user = await _userHelper.GetUserByIdAsync(model.Id);
-                if (user == null)
-                {
-                    return View(model);
-                }
+            var user = await _userHelper.GetUserByIdAsync(model.Id);
+            if (user == null)
+            {
+                return View(model);
+            }
 
 
-                var roleName = await _userHelper.GetRoleNameById(model.RoleId);
-                if (roleName == null)
-                {
-                    return View(model);
-                }
-                //var newRole = await _roleManager.GetRoleNameAsync(new IdentityRole{Id = model.RoleId });
+            var roleName = await _userHelper.GetRoleNameById(model.RoleId);
+            if (roleName == null)
+            {
+                return View(model);
+            }
+            //var newRole = await _roleManager.GetRoleNameAsync(new IdentityRole{Id = model.RoleId });
 
 
-                
-                if (_userHelper.GetUSerRoles(user).Result.Any())
-                {
+
+            if (_userHelper.GetUSerRoles(user).Result.Any())
+            {
 
                 var roleApagar = _userHelper.GetUSerRoles(user).Result.First();
-                    
+
                 await _userHelper.RemoveUserToRoleAsync(user, roleApagar);
 
-                }
-                if (await _clienteRepository.GetByUserAsync(user) == null)
+            }
+            if (await _clienteRepository.GetByUserAsync(user) == null)
+            {
+                Cliente cliente = new Cliente
                 {
-                    Cliente cliente = new Cliente
-                    {
-                        Name = user.Name,
-                        Email = user.Email,
-                        NIF= user.NIF,
-                        Adress = user.Adress,
-                        Postalcode = user.Postalcode,
-                        User = user                   
-                    };
+                    Name = user.Name,
+                    Email = user.Email,
+                    NIF = user.NIF,
+                    Adress = user.Adress,
+                    Postalcode = user.Postalcode,
+                    User = user
+                };
 
-                    await _clienteRepository.CreateAsync(cliente);
+                await _clienteRepository.CreateAsync(cliente);
 
-                }
-                await _userHelper.AddUserToRoleAsync(user, roleName);
+            }
+            await _userHelper.AddUserToRoleAsync(user, roleName);
 
-                return RedirectToAction("Index");
+            return RedirectToAction("Index");
             //}
 
             //return View(model);
 
-    }
+        }
 
 
-    public IActionResult Login()
+        public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
             {
@@ -166,7 +173,7 @@ namespace WebAguasPL.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userHelper.GetUserByEmailAsync(model.UserName);
-                if(user == null)
+                if (user == null)
                 {
                     user = new User
                     {
@@ -179,7 +186,7 @@ namespace WebAguasPL.Controllers
                     };
 
                     var result = await _userHelper.AddUserAsync(user, model.Password);
-                    if(result != IdentityResult.Success)
+                    if (result != IdentityResult.Success)
                     {
                         ModelState.AddModelError(string.Empty, "User could not be created");
                         return View(model);
@@ -211,7 +218,7 @@ namespace WebAguasPL.Controllers
             var user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
             var model = new ChangeUserViewModel();
 
-            if(user!= null)
+            if (user != null)
             {
                 model.Name = user.Name;
             }
@@ -281,5 +288,48 @@ namespace WebAguasPL.Controllers
 
             return View(model);
         }
+
+
+
+        [HttpPost]
+        public async Task<IActionResult> CreateToken([FromBody] LogInViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                var user = await _userHelper.GetUserByEmailAsync(model.UserName);
+                if (user != null)
+                {
+                    var result = await _userHelper.ValidatePasswordAsync(user, model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        var claims = new[]
+                        {
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                        };
+
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Tokens:Key"]));
+                        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var token = new JwtSecurityToken(
+                            _configuration["Tokens:Issuer"],
+                            _configuration["Tokens:Audience"],
+                            claims,
+                            expires: DateTime.UtcNow.AddMinutes(10),
+                            signingCredentials: credentials);
+                        var results = new
+                        {
+                            token = new JwtSecurityTokenHandler().WriteToken(token),
+                            expiration = token.ValidTo
+                        };
+
+                        return this.Created(string.Empty, results);
+                    }
+                }
+            }
+
+            return BadRequest();
+        }
+
     }
 }

@@ -61,11 +61,12 @@
                 @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
                 {
                     <a asp-action="ValidateContract" asp-route-id="@item.ID">Validar |</a>
+                    <a asp-action="Details" asp-route-id="@item.ID">Details |</a>
                     <a asp-action="CancelContract" asp-route-id="@item.ID">Cancelar</a>
 
                 }
                 else{
-
+                    
                     <a asp-action="Edit" asp-route-id="@item.ID">Edit |</a>
                     <a asp-action = "Details" asp-route-id = "@item.ID">Details |</a>
                     <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>

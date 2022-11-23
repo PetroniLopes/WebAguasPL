@@ -232,9 +232,16 @@ namespace WebAguasPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
             var contrato = await _contrato.GetContractByIdAsync(id);
+
             if (contrato != null)
             {
+                if (await _contrato.ContractHasReadings(contrato))
+                {
+                    this.ModelState.AddModelError(string.Empty, "O contrato não pode ser apagado porque já tem leituras associadas!");
+                    return View(contrato);
+                }
                 await _contrato.DeleteAsync(contrato);
             }
             
