@@ -102,10 +102,13 @@ namespace WebAguasPL.Data
                     throw new InvalidOperationException($"Could not create User - {name} in seeder");
                 }
 
-                //if (name == "admin")
-                //{
+                
                 await _userHelper.AddUserToRoleAsync(user, roleName);
-                //}
+                
+
+                var token = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                await _userHelper.ConfirmEmailAsync(user, token);
+
 
                 var isInRole = await _userHelper.IsUserInRoleAsync(user, roleName);
                 if (!isInRole)

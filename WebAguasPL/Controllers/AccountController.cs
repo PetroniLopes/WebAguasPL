@@ -23,16 +23,19 @@ namespace WebAguasPL.Controllers
         private readonly IUserHelper _userHelper;
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IMailHelper _mailHelper;
 
         public AccountController(IClienteRepository clienteRepository,
             IUserHelper userHelper,
             RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IMailHelper mailHelper)
         {
             _clienteRepository = clienteRepository;
             _userHelper = userHelper;
             _roleManager = roleManager;
             _configuration = configuration;
+            _mailHelper = mailHelper;
         }
 
         // GET: Users
@@ -192,17 +195,30 @@ namespace WebAguasPL.Controllers
                         return View(model);
                     }
 
-                    var loginViewModel = new LogInViewModel
-                    {
-                        Password = model.Password,
-                        RememberMe = false,
-                        UserName = model.UserName
-                    };
 
-                    var result2 = await _userHelper.LogInAsync(loginViewModel);
-                    if (result2.Succeeded)
+
+                    string myToken = await _userHelper.GenerateEmailConfirmationTokenAsync(user);
+                    
+                    string tokenLink = Url.Action("ConfirmEmail", "Account", new
                     {
-                        return RedirectToAction("Index", "Home");
+                        userid = user.Id,
+                        token = myToken
+                    }, protocol: HttpContext.Request.Scheme);
+
+                    Response response = _mailHelper.SendEmail(
+                        model.UserName, 
+                        "Email confirmation", 
+                        
+                        $"<h1>Email Confirmation</h1>" +
+                        $"To allow the user, " +
+                        $"please click in this link:</br></br><a href = \"{tokenLink}\">Confirm Email</a>"
+                        );
+
+                    if (response.IsSuccess)
+                    {
+                        ViewBag.Message = "The instructions to allow your access has been sent to email";
+                        return View(model);
+                        
                     }
 
                     ModelState.AddModelError(string.Empty, "User could not logIn");
@@ -329,6 +345,30 @@ namespace WebAguasPL.Controllers
             }
 
             return BadRequest();
+        }
+
+
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if(string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return NotFound();
+            }
+
+            var user = await _userHelper.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var result = await _userHelper.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                return NotFound();
+            }
+
+            return View();
         }
 
     }

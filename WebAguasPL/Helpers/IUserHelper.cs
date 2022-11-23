@@ -43,6 +43,13 @@ namespace WebAguasPL.Helpers
 
 
         Task<SignInResult> ValidatePasswordAsync(User user, string password);
+
+
+        Task<string> GenerateEmailConfirmationTokenAsync(User user);
+
+        Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+
+        
     }
 
 }
