@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
@@ -21,7 +22,7 @@ using Response = WebAguasPL.Helpers.Response;
 
 namespace WebAguasPL.Controllers
 {
-
+    
     public class AccountController : Controller
     {
         private readonly IClienteRepository _clienteRepository;
@@ -47,7 +48,7 @@ namespace WebAguasPL.Controllers
             _flashMessage = flashMessage;
             _random = new Random();
         }
-
+        [Authorize(Roles = "admin")]
         // GET: Users
         public async Task<IActionResult> Index()
         {
@@ -70,12 +71,13 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-            var model = new UsersViewModel
+            var model = new EditRoleViewModel
             {
                 roles = _userHelper.GetComboRoles(),
-                
+                ID = id
             };
 
+            
 
             return View(model);
         }
@@ -83,19 +85,28 @@ namespace WebAguasPL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(UsersViewModel model)
+        public async Task<IActionResult> Edit(EditRoleViewModel model)
         {
+            if (model.RoleId == null || model.RoleId=="0")
+            {
+                model.roles = _userHelper.GetComboRoles();
+                
+                return View(model);
+            }
+
+            var user = await _userHelper.GetUserByIdAsync(model.ID);
             
-            var user = await _userHelper.GetUserByIdAsync(model.Id);
             if (user == null)
             {
+                model.roles = _userHelper.GetComboRoles();
                 return View(model);
             }
 
 
-            var roleName = await _userHelper.GetRoleNameById(model.RoleId);
+            var roleName =  await _userHelper.GetRoleNameById(model.RoleId);
             if (roleName == null)
             {
+                model.roles = _userHelper.GetComboRoles();
                 return View(model);
             }
             

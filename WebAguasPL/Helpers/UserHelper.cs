@@ -34,14 +34,14 @@ namespace WebAguasPL.Helpers
         public async Task AddUserToRoleAsync(User user, string roleName)
         {
             await _userManager.AddToRoleAsync(user, roleName);
-            
-            
+
+
         }
 
         public async Task RemoveUserToRoleAsync(User user, string roleName)
         {
             await _userManager.RemoveFromRoleAsync(user, roleName);
-            
+
 
 
         }
@@ -49,13 +49,13 @@ namespace WebAguasPL.Helpers
         public async Task<IdentityResult> ChangePasswordAsync(User user, string oldPassword, string newPassword)
         {
             return await _userManager.ChangePasswordAsync(user, oldPassword, newPassword);
-            
+
         }
 
         public async Task CheckRoleAsync(string roleName)
         {
             var roleExists = await _roleManager.RoleExistsAsync(roleName);
-            
+
             if (!roleExists)
             {
                 await _roleManager.CreateAsync(new IdentityRole
@@ -67,10 +67,10 @@ namespace WebAguasPL.Helpers
 
         public async Task<IEnumerable<UsersViewModel>> GetAllUsers()
         {
-            
+
             var users = _userManager.Users.ToList();
             var userRoles = new List<UsersViewModel>();
-            
+
 
             foreach (User user in users)
             {
@@ -85,23 +85,23 @@ namespace WebAguasPL.Helpers
                 };
 
                 userRoles.Add(usersWithRoles);
-                
+
             }
-            
+
 
             return userRoles.OrderBy(p => p.Name);
         }
 
 
 
-        
+
 
         public async Task<IEnumerable<string>> GetUSerRoles(User user)
         {
             return new List<string>(await _userManager.GetRolesAsync(user));
         }
 
-        
+
 
         public async Task<User> GetUserByIdAsync(string id)
         {
@@ -111,12 +111,12 @@ namespace WebAguasPL.Helpers
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
-            
+
             return await _userManager.FindByEmailAsync(email);
         }
         public async Task<string> GetRoleNameById(string id)
         {
-            
+
 
             foreach (var role in _roleManager.Roles)
             {
@@ -138,7 +138,7 @@ namespace WebAguasPL.Helpers
             return await _signInManager.PasswordSignInAsync(
                 model.UserName,
                 model.Password,
-                model.RememberMe, 
+                model.RememberMe,
                 false);
         }
 
@@ -154,28 +154,43 @@ namespace WebAguasPL.Helpers
 
         public IEnumerable<SelectListItem> GetComboRoles()
         {
-            
-            try
+            var list = new List<SelectListItem>();
+            do
             {
-                var list = _roleManager.Roles
-                    .Select(c => new SelectListItem
-                    {
-                        Text = c.Name,
-                        Value = c.Id.ToString()
-                    }).OrderBy(l => l.Text).ToList();
-
-                list.Insert(0, new SelectListItem
+                try
                 {
-                    Text = "select role",
-                    Value = "0"
-                });
+                    list = _roleManager.Roles
+                                    .Select(c => new SelectListItem
+                                    {
+                                        Text = c.Name,
+                                        Value = c.Id.ToString()
+                                    }).OrderBy(l => l.Text).ToList();
 
-                return list;
-            }
-            catch
-            {
-                return null;
-            }
+                    list.Insert(0, new SelectListItem
+                    {
+                        Text = "select role",
+                        Value = "0"
+                    });
+
+                    
+                }
+                catch
+                {
+                    list = new List<SelectListItem>();
+
+                    list.Insert(0, new SelectListItem
+                    {
+                        Text = "select role",
+                        Value = "0"
+                    });
+                    
+                }
+            } while (list.Count <= 1 );
+
+            return list;
+
+
+
         }
 
         public async Task<SignInResult> ValidatePasswordAsync(User user, string password)
