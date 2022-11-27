@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Vereyon.Web;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
@@ -18,13 +19,15 @@ namespace WebAguasPL.Controllers
         private readonly IContratoRepository _contrato;
         private readonly IClienteRepository _cliente;
         private readonly IUserHelper _userHelper;
+        private readonly IFlashMessage _flashMessage;
 
-        public ContratosController(IContratoRepository contrato, IClienteRepository cliente, IUserHelper userHelper)
+        public ContratosController(IContratoRepository contrato, IClienteRepository cliente, IUserHelper userHelper, IFlashMessage flashMessage)
         {
            
             _contrato = contrato;
             _cliente = cliente;
             _userHelper = userHelper;
+            _flashMessage = flashMessage;
         }
 
         // GET: Contratos
@@ -168,7 +171,7 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
-
+            
 
             return View(contrato);
         }
@@ -183,6 +186,13 @@ namespace WebAguasPL.Controllers
             if (id != contrato.ID)
             {
                 return NotFound();
+            }
+
+            if (contrato.IsApproved)
+            {
+                _flashMessage.Warning("O contrato já foi aprovado, não pode ser alterado");
+                //this.ModelState.AddModelError(string.Empty, "O contrato já foi aprovado, não pode ser alterado");
+                return View(contrato);
             }
 
             if (ModelState.IsValid)
@@ -239,7 +249,8 @@ namespace WebAguasPL.Controllers
             {
                 if (await _contrato.ContractHasReadings(contrato))
                 {
-                    this.ModelState.AddModelError(string.Empty, "O contrato não pode ser apagado porque já tem leituras associadas!");
+                    _flashMessage.Warning("O contrato não pode ser apagado porque já tem leituras associadas!");
+                    //this.ModelState.AddModelError(string.Empty, "O contrato não pode ser apagado porque já tem leituras associadas!");
                     return View(contrato);
                 }
                 await _contrato.DeleteAsync(contrato);
@@ -289,6 +300,8 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
+            
+
             return View(leitura);
         }
 
@@ -322,10 +335,14 @@ namespace WebAguasPL.Controllers
                 return NotFound();
             }
 
+            
+
             var model = new LeituraViewModel
             {
                 ContratoID = contrato.ID
             };
+
+
 
             return View(model);
         }
@@ -335,6 +352,13 @@ namespace WebAguasPL.Controllers
         {
             if (this.ModelState.IsValid)
             {
+                var contrato = await _contrato.GetContractByIdAsync(model.ContratoID);
+                if (!contrato.IsApproved)
+                {
+                    _flashMessage.Warning("Só pode adicionar leituras a contratos aprovados.");
+                    //this.ModelState.AddModelError(string.Empty, "Só pode adicionar leituras a contratos aprovados.");
+                    return View(model);
+                }
                 await _contrato.AddLeituraAsync(model);
 
                 return RedirectToAction("Details", new {id = model.ContratoID});

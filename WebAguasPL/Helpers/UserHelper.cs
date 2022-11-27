@@ -154,12 +154,7 @@ namespace WebAguasPL.Helpers
 
         public IEnumerable<SelectListItem> GetComboRoles()
         {
-            //List<string> lista = new List<string>();
-
-            //foreach(var role in _roleManager.Roles)
-            //{
-
-            //}
+            
             try
             {
                 var list = _roleManager.Roles

@@ -3,49 +3,67 @@
 @{
     ViewData["Title"] = "ShowProfile";
 }
+<div class="fullBodyContainer">
 
-<h1>@Html.DisplayNameFor(model => model.Name)</h1>
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">@Model.Name Profile</h1>
+        </div>
+        <br />
+    </div>
 
-<div>
-    
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.NIF)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.NIF)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Adress)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Adress)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Postalcode)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Postalcode)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PhoneNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PhoneNumber)
-        </dd>
-    </dl>
+
+
+
+    <div style="text-align:center;">
+
+        <img src="@Url.Content(Model.ImageUrl)" alt="Image" style="width:300px; height:350px;max-width:100%;max-height:auto" />
+
+        <dl>
+            <dt>
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.NIF)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.NIF)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Adress)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Adress)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Postalcode)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Postalcode)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PhoneNumber)
+            </dd>
+        </dl>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning">Edit</a>
+
+        </div>
+    </div>
+
+
+
 </div>
-

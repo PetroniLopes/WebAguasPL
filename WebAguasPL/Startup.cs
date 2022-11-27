@@ -15,6 +15,11 @@ using System.Threading.Tasks;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
+using Microsoft.Extensions.Azure;
+using Azure.Storage.Queues;
+using Azure.Storage.Blobs;
+using Azure.Core.Extensions;
+using Vereyon.Web;
 
 namespace WebAguasPL
 {
@@ -64,7 +69,7 @@ namespace WebAguasPL
                     };
                 });
 
-
+            services.AddFlashMessage();
 
             services.AddTransient<SeedDb>();
 
@@ -81,6 +86,11 @@ namespace WebAguasPL
             services.AddScoped<IMailHelper, MailHelper>();
 
             services.AddControllersWithViews();
+            services.AddAzureClients(builder =>
+            {
+                builder.AddBlobServiceClient(Configuration["DefaultConnection:blob"], preferMsi: true);
+                builder.AddQueueServiceClient(Configuration["DefaultConnection:queue"], preferMsi: true);
+            });
 
 
 
@@ -91,6 +101,9 @@ namespace WebAguasPL
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            //Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("YOUR LICENSE KEY");
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,7 +116,7 @@ namespace WebAguasPL
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
             app.UseRouting();
 
             app.UseAuthentication();
@@ -116,6 +129,31 @@ namespace WebAguasPL
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+    }
+    internal static class StartupExtensions
+    {
+        public static IAzureClientBuilder<BlobServiceClient, BlobClientOptions> AddBlobServiceClient(this AzureClientFactoryBuilder builder, string serviceUriOrConnectionString, bool preferMsi)
+        {
+            if (preferMsi && Uri.TryCreate(serviceUriOrConnectionString, UriKind.Absolute, out Uri serviceUri))
+            {
+                return builder.AddBlobServiceClient(serviceUri);
+            }
+            else
+            {
+                return builder.AddBlobServiceClient(serviceUriOrConnectionString);
+            }
+        }
+        public static IAzureClientBuilder<QueueServiceClient, QueueClientOptions> AddQueueServiceClient(this AzureClientFactoryBuilder builder, string serviceUriOrConnectionString, bool preferMsi)
+        {
+            if (preferMsi && Uri.TryCreate(serviceUriOrConnectionString, UriKind.Absolute, out Uri serviceUri))
+            {
+                return builder.AddQueueServiceClient(serviceUri);
+            }
+            else
+            {
+                return builder.AddQueueServiceClient(serviceUriOrConnectionString);
+            }
         }
     }
 }

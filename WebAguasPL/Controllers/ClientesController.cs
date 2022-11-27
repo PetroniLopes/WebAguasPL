@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Vereyon.Web;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
@@ -21,13 +22,16 @@ namespace WebAguasPL.Controllers
         private readonly IClienteRepository _clienteRepository;
         private readonly IUserHelper _userHelper;
         private readonly IConverterHelper _converterHelper;
+        private readonly IFlashMessage _flashMessage;
 
-        public ClientesController(IClienteRepository clienteRepository, IUserHelper userHelper, IConverterHelper converterHelper)
+        public ClientesController(IClienteRepository clienteRepository, IUserHelper userHelper, IConverterHelper converterHelper, IFlashMessage flashMessage)
         {
             _clienteRepository = clienteRepository;
             _userHelper = userHelper;
             _converterHelper = converterHelper;
+            _flashMessage = flashMessage;
         }
+
 
         // GET: Clientes
         public IActionResult Index()
@@ -85,6 +89,8 @@ namespace WebAguasPL.Controllers
                     };
 
                     var result = await _userHelper.AddUserAsync(model.User, "123456");
+
+                    await _userHelper.AddUserToRoleAsync(model.User, "client");
 
                     if (result != IdentityResult.Success)
                     {
@@ -165,13 +171,11 @@ namespace WebAguasPL.Controllers
 
             if (ModelState.IsValid)
             {
+                var clienteAntigo = await _clienteRepository.GetByIdAsync(id);
+                var user = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
                 try
                 {
 
-                    var clienteAntigo = await _clienteRepository.GetByIdAsync(id);
-                    var user = await _userHelper.GetUserByEmailAsync(clienteAntigo.Email);
-
-                    
                     user.UserName = model.Email;
                     user.Email = model.Email;
                     user.NIF = model.NIF;
@@ -217,6 +221,14 @@ namespace WebAguasPL.Controllers
                         throw;
                     }
                 }
+
+                user = await _userHelper.GetUserByEmailAsync(this.User.Identity.Name);
+
+                if (await _userHelper.IsUserInRoleAsync(user, "client"))
+                {
+                    var cliente = await _clienteRepository.GetByUserAsync(user);
+                    return RedirectToAction(nameof(ShowProfile), cliente);
+                }
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
@@ -254,7 +266,8 @@ namespace WebAguasPL.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            this.ModelState.AddModelError(string.Empty, "O cliente não pode ser apagado porque já tem contratos associados!");
+            _flashMessage.Warning("O cliente não pode ser apagado porque já tem contratos associados!");
+            //this.ModelState.AddModelError(string.Empty, "O cliente não pode ser apagado porque já tem contratos associados!");
             return View(cliente);
         }
 

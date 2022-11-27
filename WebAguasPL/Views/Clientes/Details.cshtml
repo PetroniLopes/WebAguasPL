@@ -3,64 +3,74 @@
 @{
     ViewData["Title"] = "Details";
 }
+<div class="fullBodyContainer">
 
-<h1>Details</h1>
-
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <div class="row">
-
-        <div class="col-md-8">
-
-            <dl class="row">
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.Name)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.Name)
-                </dd>
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.NIF)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.NIF)
-                </dd>
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.Adress)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.Adress)
-                </dd>
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.Postalcode)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.Postalcode)
-                </dd>
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.Email)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.Email)
-                </dd>
-                <dt class = "col-sm-2">
-                    @Html.DisplayNameFor(model => model.PhoneNumber)
-                </dt>
-                <dd class = "col-sm-10">
-                    @Html.DisplayFor(model => model.PhoneNumber)
-                </dd>
-            </dl>
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">Client Details</h1>
         </div>
-        <div class="col-md-4">
+        <br />
+    </div>
 
-            <img src="@Url.Content(Model.ImageUrl)" alt="Image" style="width:300px; height:350px;max-width:100%;max-height:auto" />
 
+
+    <div style="text-align:center;">
+
+
+        <img src="@Url.Content(Model.ImageUrl)" alt="Image" style="width:300px; height:350px;max-width:100%;max-height:auto" />
+
+
+
+        <dl>
+            <dt>
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.NIF)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.NIF)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Adress)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Adress)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Postalcode)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Postalcode)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.Email)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Email)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.PhoneNumber)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PhoneNumber)
+            </dd>
+        </dl>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-warning">Edit</a>
         </div>
     </div>
 
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.ID">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+
+
+    <div align="right">
+
+        <a asp-action="Index">Back to List</a>
+    </div>
+
 </div>

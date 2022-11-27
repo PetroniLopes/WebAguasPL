@@ -4,35 +4,44 @@
     ViewData["Title"] = "Edit";
 }
 
+<div class="fullBodyContainer">
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">Edit Reading</h1>
+        </div>
+        <br />
+    </div>
 
-<h4>Edit Leitura</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="EditLeitura">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ID" />
+    <form asp-action="EditLeitura" style="text-align:center;">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="ID" />
             
-            <div class="form-group">
+        <div class="row py-2">
+            <div class="col-md-8">
                 <label asp-for="Valor" class="control-label"></label>
-                <input asp-for="Valor" class="form-control" />
+                <input asp-for="Valor" class="form-control text-center" />
                 <span asp-validation-for="Valor" class="text-danger"></span>
             </div>
-
-            <div class="form-group">
+            <div class="col-md-4 pt-md-0 pt-3">
                 <label asp-for="DataLeitura" class="control-label"></label>
-                <input asp-for="DataLeitura" class="form-control" />
+                @Html.TextBoxFor(x => x.DataLeitura, "{0:yyyy-MM-dd}", new { @class = "form-control text-center", @type = "date"})
                 <span asp-validation-for="DataLeitura" class="text-danger"></span>
             </div>
+        </div>
 
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        <br />
+        
+
+        <div class="form-group">
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+    </form>
+
+
+    <div align="right">
+        <a asp-action="Index">Back to List</a>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 

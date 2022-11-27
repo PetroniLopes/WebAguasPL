@@ -161,7 +161,7 @@ namespace WebAguasPL.Data
             contrato.Leituras.Add(new Leitura
             {
                 DataLeitura = model.DataLeitura,
-                Valor = ValorConsumo(model.Valor),
+                Valor = model.Valor,
                 Estado = model.Estado
             });
 

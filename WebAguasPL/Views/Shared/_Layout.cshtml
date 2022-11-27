@@ -6,12 +6,15 @@
     <title>@ViewData["Title"] - WebAguasPL</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/images/site/logo.ico" rel="shortcut icon" type="image/x-icon"/>
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">WebAguasPL</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/images/site/logo.png" style="height:50px; width:auto" /></a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -19,16 +22,16 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa-solid fa-house"></i> Home</a>
                         </li>
                         <li class="nav-item">
                             
                             @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("client")){
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="ShowProfile">Clientes</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="ShowProfile"><i class="fa-solid fa-user"></i> Profile</a>
                             }
                             else{
                                 @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("admin")){
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="Index">Clientes</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Clientes" asp-action="Index"><i class="fa-solid fa-user"></i> Clients</a>
 
                                 }
                             }
@@ -37,20 +40,20 @@
 
                             @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("client"))
                             {
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Contratos" asp-action="Index">Contratos</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Contratos" asp-action="Index"><i class="fa-solid fa-file-contract"></i> Contratos</a>
                             }
                             else
                             {
                                 @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
                                 {
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Contratos" asp-action="Index">Contratos</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Contratos" asp-action="Index"><i class="fa-solid fa-file-contract"></i> Contratos</a>
 
                                 }
                             }
                         </li>
                         <li class="nav-item">
                             @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("admin")) { 
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Users</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index"><i class="fa-regular fa-user"></i> Users</a>
                             }
                         </li>
                     </ul>
@@ -78,15 +81,20 @@
             </div>
         </nav>
     </header>
+    <br />
+    <br />
+    <br />
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+
+
+    <footer class="border-top footer text-muted" style="background-color: white">
         <div class="container">
-            &copy; 2022 - WebAguasPL - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2022 - WebAguasPL - Desenvolvido por Pedro Lopes - lopes.pedromv@gmail.com
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

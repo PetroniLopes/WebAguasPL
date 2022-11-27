@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.Extensions.Configuration;
@@ -10,11 +11,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Vereyon.Web;
 using WebAguasPL.Data;
 using WebAguasPL.Data.Entities;
 using WebAguasPL.Helpers;
 using WebAguasPL.Models;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+using Response = WebAguasPL.Helpers.Response;
 
 namespace WebAguasPL.Controllers
 {
@@ -26,20 +29,22 @@ namespace WebAguasPL.Controllers
         private readonly Microsoft.AspNetCore.Identity.RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IMailHelper _mailHelper;
-
+        private readonly IFlashMessage _flashMessage;
         private Random _random;
 
         public AccountController(IClienteRepository clienteRepository,
             IUserHelper userHelper,
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
-            IMailHelper mailHelper)
+            IMailHelper mailHelper,
+            IFlashMessage flashMessage)
         {
             _clienteRepository = clienteRepository;
             _userHelper = userHelper;
             _roleManager = roleManager;
             _configuration = configuration;
             _mailHelper = mailHelper;
+            _flashMessage = flashMessage;
             _random = new Random();
         }
 
@@ -59,7 +64,7 @@ namespace WebAguasPL.Controllers
             }
 
             var user = _userHelper.GetUserByIdAsync(id);
-
+            
             if (user == null)
             {
                 return NotFound();
@@ -68,8 +73,7 @@ namespace WebAguasPL.Controllers
             var model = new UsersViewModel
             {
                 roles = _userHelper.GetComboRoles(),
-
-
+                
             };
 
 
@@ -81,8 +85,7 @@ namespace WebAguasPL.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UsersViewModel model)
         {
-            //if (ModelState.IsValid)
-            //{
+            
             var user = await _userHelper.GetUserByIdAsync(model.Id);
             if (user == null)
             {
@@ -95,7 +98,7 @@ namespace WebAguasPL.Controllers
             {
                 return View(model);
             }
-            //var newRole = await _roleManager.GetRoleNameAsync(new IdentityRole{Id = model.RoleId });
+            
 
 
 
@@ -107,7 +110,7 @@ namespace WebAguasPL.Controllers
                 await _userHelper.RemoveUserToRoleAsync(user, roleApagar);
 
             }
-            if (await _clienteRepository.GetByUserAsync(user) == null)
+            if (await _clienteRepository.GetByUserAsync(user) == null && roleName=="client")
             {
                 Cliente cliente = new Cliente
                 {
@@ -116,7 +119,8 @@ namespace WebAguasPL.Controllers
                     NIF = user.NIF,
                     Adress = user.Adress,
                     Postalcode = user.Postalcode,
-                    User = user
+                    User = user,
+                    ImageUrl = $"~/images/clientes/noimage.png"
                 };
 
                 await _clienteRepository.CreateAsync(cliente);
@@ -125,9 +129,7 @@ namespace WebAguasPL.Controllers
             await _userHelper.AddUserToRoleAsync(user, roleName);
 
             return RedirectToAction("Index");
-            //}
-
-            //return View(model);
+            
 
         }
 
@@ -159,7 +161,8 @@ namespace WebAguasPL.Controllers
                 }
             }
 
-            this.ModelState.AddModelError(string.Empty, "Failed to login");
+            _flashMessage.Danger("Failed to login");
+            //this.ModelState.AddModelError(string.Empty, "Failed to login");
             return View(model);
         }
 
@@ -196,7 +199,8 @@ namespace WebAguasPL.Controllers
                     var result = await _userHelper.AddUserAsync(user, model.Password);
                     if (result != IdentityResult.Success)
                     {
-                        ModelState.AddModelError(string.Empty, "User could not be created");
+                        _flashMessage.Confirmation("User could not be created");
+                        //ModelState.AddModelError(string.Empty, "User could not be created");
                         return View(model);
                     }
 
@@ -221,12 +225,15 @@ namespace WebAguasPL.Controllers
 
                     if (response.IsSuccess)
                     {
-                        ViewBag.Message = "The instructions to allow your access has been sent to email";
+                        _flashMessage.Confirmation("The instructions to allow your access has been sent to email");
+                        //ViewBag.Message = "The instructions to allow your access has been sent to email";
                         return View(model);
                         
                     }
 
-                    ModelState.AddModelError(string.Empty, "User could not logIn");
+                    _flashMessage.Warning("User could not logIn");
+                    //ModelState.AddModelError(string.Empty, "User could not logIn");
+                    
 
                 }
             }
@@ -249,7 +256,8 @@ namespace WebAguasPL.Controllers
 
                 if (user == null)
                 {
-                    this.ModelState.AddModelError(string.Empty, "User not found");
+                    _flashMessage.Warning("User not found");
+                    //this.ModelState.AddModelError(string.Empty, "User not found");
                     return View(model);
                 }
 
@@ -278,12 +286,15 @@ namespace WebAguasPL.Controllers
 
                 if (response.IsSuccess)
                 {
-                    ViewBag.Message = "The instructions to allow your access has been sent to email";
+                    _flashMessage.Info("The instructions to allow your access has been sent to email");
                     return View();
 
-                }
+                    //ViewBag.Message = "The instructions to allow your access has been sent to email";
+                    //return View();
 
-                ModelState.AddModelError(string.Empty, "Something went wrong, please contact us at appaguaslisboa@gmail.com");
+                }
+                _flashMessage.Danger("Something went wrong, please contact us at appaguaslisboa@gmail.com");
+                //ModelState.AddModelError(string.Empty, "Something went wrong, please contact us at appaguaslisboa@gmail.com");
 
             }
             return View(model);
@@ -317,11 +328,13 @@ namespace WebAguasPL.Controllers
 
                     if (response.Succeeded)
                     {
-                        ViewBag.UserMessage = "User updated";
+                        _flashMessage.Confirmation("User updated");
+                        //ViewBag.UserMessage = "User updated";
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
+                        _flashMessage.Danger(string.Empty, response.Errors.FirstOrDefault().Description);
+                        //ModelState.AddModelError(string.Empty, response.Errors.FirstOrDefault().Description);
                     }
                 }
             }
@@ -352,12 +365,14 @@ namespace WebAguasPL.Controllers
                     }
                     else
                     {
-                        this.ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
+                        _flashMessage.Danger(string.Empty, result.Errors.FirstOrDefault().Description);
+                        //this.ModelState.AddModelError(string.Empty, result.Errors.FirstOrDefault().Description);
                     }
                 }
                 else
                 {
-                    this.ModelState.AddModelError(string.Empty, "User not found");
+                    _flashMessage.Warning("User not found");
+                    //this.ModelState.AddModelError(string.Empty, "User not found");
                 }
             }
 

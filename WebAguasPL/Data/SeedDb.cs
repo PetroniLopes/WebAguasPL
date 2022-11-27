@@ -34,6 +34,7 @@ namespace WebAguasPL.Data
                 await _userHelper.CheckRoleAsync("admin");
                 await _userHelper.CheckRoleAsync("client");
                 await _userHelper.CheckRoleAsync("employee");
+                await _userHelper.CheckRoleAsync("remove");
 
 
 

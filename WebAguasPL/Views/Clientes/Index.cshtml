@@ -1,65 +1,109 @@
 ﻿@model IEnumerable<WebAguasPL.Data.Entities.Cliente>
-
 @{
     ViewData["Title"] = "Index";
 }
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css" />
 
-<h1>Index</h1>
+<div class="fullBodyContainer">
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">Clientes</h1>
+        </div>
+        <br />
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NIF)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Adress)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Postalcode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NIF)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Adress)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Postalcode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
+    <p style="text-align:center">
+        <a asp-action="Create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create</a>
+    </p>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading"></div>
+                <div class="panel-body">
+
+                    <table class="table table-hover table-responsive-xl table-striped" id="MyTable">
+
+
+                        <thead>
+                            <tr>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Name)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.NIF)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Adress)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Postalcode)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Email)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                                </th>
+                                <th style="width:125px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Name)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NIF)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Adress)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Postalcode)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Email)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.PhoneNumber)
+                                    </td>
+                                    <td>
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-warning"><i class="fa-solid fa-edit"></i></a>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-info"><i class="fa-solid fa-circle-info"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#MyTable').DataTable();
+
+
+
+        });
+    </script>
+
+
+
 }
-    </tbody>
-</table>
+

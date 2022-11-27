@@ -4,75 +4,131 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="fullBodyContainer">
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">Contracts</h1>
+        </div>
+        <br />
+    </div>
 
-<p>
-    <a asp-action="SelectCLiente">Create New</a>
-    
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
+    <p style="text-align:center">
+        <a asp-action="SelectCLiente" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create</a>
+    </p>
+
+    <div class="container">
+
+        <div class="row">
+            @foreach (var item in Model)
             {
-                <th>
-                    @Html.DisplayNameFor(model => model.Cliente.Name)
-                </th>
+                <div class="col-md-4">
+                    @if (item.IsApproved)
+                    {
+                        <div class="card card-true">
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
+                            {
+                                <h3>@Html.DisplayFor(modelItem => item.Cliente.Name)</h3>
+                            }
+
+                            <p><b>@Html.DisplayNameFor(model => model.Adress) -</b> @Html.DisplayFor(modelItem => item.Adress)</p>
+                            <p><b>@Html.DisplayNameFor(model => model.Postalcode) -</b> @Html.DisplayFor(modelItem => item.Postalcode)</p>
+                            <p><b>@Html.DisplayNameFor(model => model.ContractDate) -</b> @Html.DisplayFor(modelItem => item.ContractDate)</p>
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
+                            {
+                                <div style="float:left; display: flex; ">
+
+                                    <div>
+                                        <a asp-action="ValidateContract" asp-route-id="@item.ID" class="btn btn-outline-success"><i class="fa-solid fa-check"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-info"><i class="fa-solid fa-circle-info"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="CancelContract" asp-route-id="@item.ID" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i></a>
+                                    </div>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div style="float:left; display: flex; ">
+
+                                    <div>
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-warning"><i class="fa-solid fa-edit"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-info"><i class="fa-solid fa-circle-info"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+
+
+                    }
+                    else
+                    {
+                        <div class="card card-false" >
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
+                            {
+                                <h3>@Html.DisplayFor(modelItem => item.Cliente.Name)</h3>
+                            }
+
+                            <p><b>@Html.DisplayNameFor(model => model.Adress) -</b> @Html.DisplayFor(modelItem => item.Adress)</p>
+                            <p><b>@Html.DisplayNameFor(model => model.Postalcode) -</b> @Html.DisplayFor(modelItem => item.Postalcode)</p>
+                            <p><b>@Html.DisplayNameFor(model => model.ContractDate) -</b> @Html.DisplayFor(modelItem => item.ContractDate)</p>
+                            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
+                            {
+                                <div style="float:left; display: flex; ">
+
+                                    <div>
+                                        <a asp-action="ValidateContract" asp-route-id="@item.ID" class="btn btn-outline-success"><i class="fa-solid fa-check"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-info"><i class="fa-solid fa-circle-info"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="CancelContract" asp-route-id="@item.ID" class="btn btn-outline-danger"><i class="fa-solid fa-xmark"></i></a>
+                                    </div>
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div style="float:left; display: flex; ">
+
+                                    <div>
+                                        <a asp-action="Edit" asp-route-id="@item.ID" class="btn btn-outline-warning"><i class="fa-solid fa-edit"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Details" asp-route-id="@item.ID" class="btn btn-outline-info"><i class="fa-solid fa-circle-info"></i></a>
+                                    </div>
+                                    &nbsp;
+                                    <div>
+                                        <a asp-action="Delete" asp-route-id="@item.ID" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></a>
+                                    </div>
+                                </div>
+
+                            }
+                        </div>
+                    }
+                </div>
 
             }
-            <th>
-                @Html.DisplayNameFor(model => model.Adress)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Postalcode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ContractDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsApproved)
-            </th>
-            
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
-            {
-                <td>
-                    @Html.DisplayFor(modelItem => item.Cliente.Name)
-                </td>
+        </div>
+    </div>
+</div>
 
-            }
-            <td>
-                @Html.DisplayFor(modelItem => item.Adress)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Postalcode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ContractDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsApproved)
-            </td>
-            <td>
-                @if (this.User.Identity.IsAuthenticated && this.User.IsInRole("employee"))
-                {
-                    <a asp-action="ValidateContract" asp-route-id="@item.ID">Validar |</a>
-                    <a asp-action="Details" asp-route-id="@item.ID">Details |</a>
-                    <a asp-action="CancelContract" asp-route-id="@item.ID">Cancelar</a>
 
-                }
-                else{
-                    
-                    <a asp-action="Edit" asp-route-id="@item.ID">Edit |</a>
-                    <a asp-action = "Details" asp-route-id = "@item.ID">Details |</a>
-                    <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-                }
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+

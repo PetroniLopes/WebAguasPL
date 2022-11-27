@@ -3,39 +3,42 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit @Html.DisplayFor(model => model.Name)</h1>
+<div class="fullBodyContainer">
+    <div>
+        <br />
+        <div class="headerContainer">
+            <h1 class="text-center">Edit user role</h1>
+        </div>
+        <br />
+    </div>
 
 
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <br/>
-            <div class="form-group">
-                <label asp-for="RoleId" class="control-label"></label>
-                <select asp-for="RoleId" asp-items="Model.roles" class="form-control"></select>
-                <span asp-validation-for="RoleId" class="text-danger"></span>
-            </div>
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <form asp-action="Edit" class="text-center">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <br/>
+                <div class="form-group">
+                    <label asp-for="RoleId" class="control-label"></label>
+                    <select asp-for="RoleId" asp-items="Model.roles" class="form-control text-center"></select>
+                    <span asp-validation-for="RoleId" class="text-danger"></span>
+                </div>
             
             
-            
-            
-            
-            <br />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <br />
+                <div class="form-group text-center">
+                    <input type="submit" value="Save" class="btn btn-primary" />
                 
-            </div>
-        </form>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div align="right">
+        <a asp-action="Index">Back to List</a>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
